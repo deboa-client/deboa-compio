@@ -1,14 +1,14 @@
-# deboa
+# deboa-compio
 
-[![Crates.io downloads](https://img.shields.io/crates/d/deboa)](https://crates.io/crates/deboa) [![crates.io](https://img.shields.io/crates/v/deboa?style=flat-square)](https://crates.io/crates/deboa) [![Build Status](https://github.com/ararog/deboa/actions/workflows/rust.yml/badge.svg?event=push)](https://github.com/ararog/deboa/actions/workflows/rust.yml) ![Crates.io MSRV](https://img.shields.io/crates/msrv/deboa) [![Documentation](https://docs.rs/deboa/badge.svg)](https://docs.rs/deboa/latest/deboa) [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ararog/deboa/blob/main/LICENSE.md)  [![codecov](https://codecov.io/gh/ararog/deboa/graph/badge.svg?token=T0HSBAPVSI)](https://codecov.io/gh/ararog/deboa)
+[![Crates.io downloads](https://img.shields.io/crates/d/deboa-compio)](https://crates.io/crates/deboa-compio) [![crates.io](https://img.shields.io/crates/v/deboa-compio?style=flat-square)](https://crates.io/crates/deboa-compio) [![Build Status](https://github.com/deboa-client/deboa-compio/actions/workflows/rust.yml/badge.svg?event=push)](https://github.com/deboa-client/deboa-compio/actions/workflows/rust.yml) ![Crates.io MSRV](https://img.shields.io/crates/msrv/deboa-compio) [![Documentation](https://docs.rs/deboa-compio/badge.svg)](https://docs.rs/deboa-compio/latest/deboa-compio) [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/deboa-client/deboa-compio/main/LICENSE.md)  [![codecov](https://codecov.io/gh/deboa-client/deboa-compio/graph/badge.svg?token=T0HSBAPVSI)](https://codecov.io/gh/deboa-client/deboa-compio)
 
 ## Description
 
-**deboa** ("fine" portuguese slang) is a straightforward, non opinionated, developer-centric HTTP client library for Rust. It offers a rich array of modern features—from flexible authentication and serialization formats to runtime compatibility and middleware support—while maintaining simplicity and ease of use. It’s especially well-suited for Rust projects that require a lightweight, efficient HTTP client without sacrificing control or extensibility.
+**deboa-smol** ("fine" portuguese slang) is a deboa implementation for smol runtime.
 
 ## Attention
 
-This release has a major api change. Please check the [migration guide](https://github.com/ararog/deboa/blob/main/MIGRATION_GUIDE.md) for more information.
+This release has a major api change. Please check the [migration guide](https://github.com/deboa-client/deboa/blob/main/MIGRATION_GUIDE.md) for more information.
 
 ## Features
 
@@ -23,7 +23,7 @@ This release has a major api change. Please check the [migration guide](https://
 - comprehensive error handling
 - response streaming
 - upgrade support (websocket, etc.)
-- http 1/2/3 support via runtime crates
+- http 1/2/3 support
 
 ## Benchmark Results
 
@@ -41,13 +41,13 @@ As of the latest benchmark run, Deboa demonstrates competitive performance compa
 
 Either run from command line:
 
-`cargo add deboa http`
+`cargo add deboa-smol http`
 
 Or add to your `Cargo.toml`:
 
 ```toml
 deboa = { version = "0.1.0-beta.23" }
-deboa-compio = { version = "0.1.1-beta.7" }
+deboa-smol = { version = "0.1.0-beta.12" }
 http = "1.3.1"
 ```
 
@@ -61,16 +61,17 @@ http = "1.3.1"
 
 ## Usage
 
-```rust
+```rust,ignore
 use deboa::{
-    HttpClient,
+    Client,
     request::{DeboaRequest, FetchWith, get},
     Result,
 };
-use deboa_compio::Client;
-use deboa_extras::http::{self, serde::json::JsonBody};
-
+use deboa_smol::InnerClient;
+use deboa_extras::serde::json::JsonBody;
 use ::http::Method;
+use macro_rules_attribute::apply;
+use smol_macros::main;
 
 #[derive(Debug, serde::Deserialize)]
 pub struct Post {
@@ -79,12 +80,11 @@ pub struct Post {
     pub body: String,
 }
 
-#[compio::main]
+#[apply(main!)]
 async fn main() -> Result<()> {
-    let client = Client::new();
+    let client = Client::<InnerClient>::default();
 
     /*
-
     // You can also use the Fetch trait to issue requests
 
     let posts: Vec<Post> = "https://jsonplaceholder.typicode.com/posts"
@@ -131,15 +131,14 @@ async fn main() -> Result<()> {
     let response = request.send_with(&mut client).await?;
     assert_eq!(response.status(), 201);
 
-    */
-
     let posts: Vec<Post> = get("https://jsonplaceholder.typicode.com/posts")?
-      .send_with(client)
+      .send_with(&client)
       .await?
       .body_as(JsonBody)
       .await?;
 
     println!("posts: {:#?}", posts);
+    */
 
     Ok(())
 }
@@ -149,11 +148,18 @@ async fn main() -> Result<()> {
 
 You can create a new project from the template using `cargo generate`:
 
-`cargo generate ararog/deboa-templates`
+`cargo generate deboa-client/deboa-templates`
 
 ## License
 
-MIT
+Licensed under either of
+
+- Apache License, Version 2.0
+  (LICENSE-APACHE or <https://www.apache.org/licenses/LICENSE-2.0>)
+- MIT license
+  (LICENSE-MIT or <https://opensource.org/licenses/MIT>)
+
+at your option.
 
 ## Author
 
